@@ -1,41 +1,137 @@
 package f2.spw;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-import javax.swing.JPanel;
+import javax.swing.Timer;
 
-public class GamePanel extends JPanel {
-	
-	private BufferedImage bi;	
-	Graphics2D big;
-	ArrayList<Sprite> sprites = new ArrayList<Sprite>();
 
-	public GamePanel() {
-		bi = new BufferedImage(400, 600, BufferedImage.TYPE_INT_ARGB);
-		big = (Graphics2D) bi.getGraphics();
-		big.setBackground(Color.BLACK);
-	}
-
-	public void updateGameUI(GameReporter reporter){
-		big.clearRect(0, 0, 400, 600);
+public class GameEngine implements KeyListener, GameReporter{
+	GamePanel gp;
 		
-		big.setColor(Color.WHITE);		
-		big.drawString(String.format("%08d", reporter.getScore()), 300, 20);
-		for(Sprite s : sprites){
-			s.draw(big);
+	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();	
+	private SpaceShip v;	
+	
+	private Timer timer;
+	
+	private long score = 0;
+	private double difficulty = 0.1;
+	
+	public GameEngine(GamePanel gp, SpaceShip v) {
+		this.gp = gp;
+		this.v = v;		
+		
+		gp.sprites.add(v);
+		
+		timer = new Timer(50, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				process();
+			}
+		});
+		timer.setRepeats(true);
+		
+	}
+	
+	public void start(){
+		timer.start();
+	}
+	
+	private void generateEnemy(){
+		Enemy e = new Enemy((int)(Math.random()*390), 30);
+		gp.sprites.add(e);
+		enemies.add(e);
+	}
+	
+	private void process(){
+		if(Math.random() < difficulty){
+			generateEnemy();
 		}
 		
-		repaint();
+		Iterator<Enemy> e_iter = enemies.iterator();
+		while(e_iter.hasNext()){
+			Enemy e = e_iter.next();
+			e.proceed();
+			
+			if(!e.isAlive()){
+				e_iter.remove();
+				gp.sprites.remove(e);
+				score += 100;
+			}
+		}
+		
+		gp.updateGameUI(this);
+		
+		Rectangle2D.Double vr = v.getRectangle();
+		Rectangle2D.Double er;
+		for(Enemy e : enemies){
+			er = e.getRectangle();
+			if(er.intersects(vr)){
+				die();
+				return;
+			}
+		}
+	}
+	
+	public void die(){
+		timer.stop();
+	}
+	
+	void controlVehicle(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_NUMPAD1:
+			v.move(-1,1);
+			break;	
+		case KeyEvent.VK_NUMPAD3:
+			v.move(1,1);
+			break;	
+		case KeyEvent.VK_NUMPAD7:
+			v.move(-1,-1);
+			break;	
+		case KeyEvent.VK_NUMPAD9:
+			v.move(1,-1);
+			break;	
+		case KeyEvent.VK_NUMPAD2:
+			v.hmove(2);
+			break;	
+		case KeyEvent.VK_NUMPAD8:
+			v.hmove(-2);
+			break;			
+		case KeyEvent.VK_NUMPAD4:
+			v.vmove(-2);
+			break;
+		case KeyEvent.VK_NUMPAD6:
+			v.vmove(2);
+			break;
+		case KeyEvent.VK_D:
+			difficulty += 0.2;
+			break;
+		}
+	}
+
+	public long getScore(){
+		return score;
+	}
+	
+	@Override
+	public void keyPressed(KeyEvent e) {
+		controlVehicle(e);
+		
 	}
 
 	@Override
-	public void paint(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
-		g2d.drawImage(bi, null, 0, 0);
+	public void keyReleased(KeyEvent e) {
+		//do nothing
 	}
 
+	@Override
+	public void keyTyped(KeyEvent e) {
+		//do nothing		
+	}
 }

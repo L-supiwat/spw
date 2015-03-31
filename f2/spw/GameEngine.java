@@ -62,7 +62,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			if(!e.isAlive()){
 				e_iter.remove();
 				gp.sprites.remove(e);
-				score += 150;
+				score += 100;
 			}
 		}
 		
@@ -85,14 +85,32 @@ public class GameEngine implements KeyListener, GameReporter{
 	
 	void controlVehicle(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_LEFT:
-			v.move(-1);
+		case KeyEvent.VK_NUMPAD1:
+			v.move(-1,1);
+			break;	
+		case KeyEvent.VK_NUMPAD3:
+			v.move(1,1);
+			break;	
+		case KeyEvent.VK_NUMPAD7:
+			v.move(-1,-1);
+			break;	
+		case KeyEvent.VK_NUMPAD9:
+			v.move(1,-1);
+			break;	
+		case KeyEvent.VK_NUMPAD2:
+			v.hmove(2);
+			break;	
+		case KeyEvent.VK_NUMPAD8:
+			v.hmove(-2);
+			break;			
+		case KeyEvent.VK_NUMPAD4:
+			v.vmove(-2);
 			break;
-		case KeyEvent.VK_RIGHT:
-			v.move(1);
+		case KeyEvent.VK_NUMPAD6:
+			v.vmove(2);
 			break;
 		case KeyEvent.VK_D:
-			difficulty += 0.1;
+			difficulty += 0.2;
 			break;
 		}
 	}
