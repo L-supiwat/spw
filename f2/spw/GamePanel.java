@@ -28,7 +28,11 @@ public class GamePanel extends JPanel {
 		for(Sprite s : sprites){
 			s.draw(big);
 		}
-		
+		/*if(reporter == 1)
+			big.drawString(String.format("PAUSE", reporter.getScore()), 200, 300);
+			for(Sprite s : sprites){
+				s.draw(big);
+		}*/
 		repaint();
 	}
 

@@ -18,11 +18,12 @@ public class GameEngine implements KeyListener, GameReporter{
 	private ArrayList<Item> items = new ArrayList<Item>();	
 	private SpaceShip v;	
 	
+	private int step = 2;
 	private Timer timer;
-	
+	public static boolean status;
 	private long score = 0;
 	private double difficulty = 0.1;
-	
+	public boolean createOnPause = false;
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
 		this.v = v;		
@@ -45,7 +46,7 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 	
 	private void generateEnemy(){
-		Enemy e = new Enemy((int)(Math.random()*390), 30);
+		Enemy e = new Enemy((int)(Math.random()*390), 30, this.createOnPause);
 		gp.sprites.add(e);
 		enemies.add(e);
 	}
@@ -56,10 +57,15 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 	
 	private void process(){
-	
+		
+		if(getScore() % 1000 == 100){
+			generateItem();
+		}
+				
+		
 		if(Math.random() < difficulty){
 			generateEnemy();
-			generateItem();
+			
 		}
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
@@ -68,7 +74,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			e.proceed();
 		
 		
-			if(!e.isAlive()){
+			if(!e.isAlive() || e.isCreateOnPause()){
 				e_iter.remove();
 				gp.sprites.remove(e);
 				score += 100;
@@ -84,7 +90,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			if(!i.isAlive()){
 				i_iter.remove();
 				gp.sprites.remove(i);
-				score += 100;
+				//score += 100;
 			}
 		
 		}
@@ -96,6 +102,8 @@ public class GameEngine implements KeyListener, GameReporter{
 		for(Item i : items){
 			ir = i.getRectangle();
 			if(ir.intersects(vr)){
+				//i_iter.remove();
+				gp.sprites.remove(i);
 				score += 500;
 			}
 		}
@@ -111,36 +119,58 @@ public class GameEngine implements KeyListener, GameReporter{
 	public void die(){
 		timer.stop();
 	}
+	void control(KeyEvent e){
+		status = true;
+		switch(e.getKeyCode()){
+			case KeyEvent.VK_P:{
+				
+				die();
+				createOnPause = true;
+				for(Enemy en : enemies){
+					//if(status == true){
+						en.enemystop();
+					//	status = false;
+					//}
+					//else{
+					//	en.enemyresume();
+					//	status = true;
+					//}
+					
+				}
+				break;
+			}
+			case KeyEvent.VK_R:{
+				
+				createOnPause = false;
+				start();
+				for(Enemy en : enemies){
+						
+						en.enemyresume();
+				}break;
+			}
+			
+		
+		}
+	}
 	
 	void controlVehicle(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_NUMPAD1:
-			v.move(-2,2);
+		case KeyEvent.VK_DOWN:
+			v.hmove(step);
 			break;	
-		case KeyEvent.VK_NUMPAD3:
-			v.move(2,2);
-			break;	
-		case KeyEvent.VK_NUMPAD7:
-			v.move(-2,-2);
-			break;	
-		case KeyEvent.VK_NUMPAD9:
-			v.move(2,-2);
-			break;	
-		case KeyEvent.VK_NUMPAD2:
-			v.hmove(2);
-			break;	
-		case KeyEvent.VK_NUMPAD8:
-			v.hmove(-2);
+		case KeyEvent.VK_UP:
+			v.hmove(-step);
 			break;			
-		case KeyEvent.VK_NUMPAD4:
-			v.vmove(-2);
+		case KeyEvent.VK_LEFT:
+			v.vmove(-step);
 			break;
-		case KeyEvent.VK_NUMPAD6:
-			v.vmove(2);
+		case KeyEvent.VK_RIGHT:
+			v.vmove(step);
 			break;
 		case KeyEvent.VK_D:
 			difficulty += 0.2;
 			break;
+		
 		}
 	}
 
@@ -150,8 +180,9 @@ public class GameEngine implements KeyListener, GameReporter{
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
+		control(e);
 		controlVehicle(e);
-		
+			
 	}
 
 	@Override
@@ -162,5 +193,13 @@ public class GameEngine implements KeyListener, GameReporter{
 	@Override
 	public void keyTyped(KeyEvent e) {
 		//do nothing		
+	}
+	
+	public void stop(){
+		step = 0;
+	}
+	
+	public void resume(){
+		step = 2;
 	}
 }
