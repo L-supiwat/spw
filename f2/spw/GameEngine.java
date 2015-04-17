@@ -15,9 +15,12 @@ public class GameEngine implements KeyListener, GameReporter{
 	GamePanel gp;
 		
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();	
-	private ArrayList<Item> items = new ArrayList<Item>();	
+	private ArrayList<Item> items = new ArrayList<Item>();
+	private ArrayList<Shot> shots = new ArrayList<Shot>();
 	private SpaceShip v;	
 	
+	public int tmpx = 180;
+	public int tmpy = 450;
 	private int step = 2;
 	private Timer timer;
 	public static boolean status;
@@ -44,7 +47,11 @@ public class GameEngine implements KeyListener, GameReporter{
 	public void start(){
 		timer.start();
 	}
-	
+	private void generateShot(){
+		Shot s = new Shot(tmpx, tmpy , this.createOnPause);
+		gp.sprites.add(s);
+		shots.add(s);
+	}
 	private void generateEnemy(){
 		Enemy e = new Enemy((int)(Math.random()*390), 30, this.createOnPause);
 		gp.sprites.add(e);
@@ -94,11 +101,35 @@ public class GameEngine implements KeyListener, GameReporter{
 			}
 		
 		}
-		gp.updateGameUI(this);
+		Iterator<Shot> s_iter = shots.iterator();
+		while(s_iter.hasNext()){
+			Shot s = s_iter.next();
+			s.proceed();
+		
+		
+			if(!s.isAlive()){
+				s_iter.remove();
+				gp.sprites.remove(s);
+			}
+		
+		}
+		gp.updateGameUI(this,false);
 		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;
+		Rectangle2D.Double sr;
 		Rectangle2D.Double ir;
+		for(Shot s : shots ){
+			sr = s.getRectangle();
+			for(Enemy e : enemies){
+				er = e.getRectangle();
+				if(sr.intersects(er)){
+					gp.sprites.remove(e);
+					gp.sprites.remove(s);
+				}
+			}
+			
+		}
 		for(Item i : items){
 			ir = i.getRectangle();
 			if(ir.intersects(vr)){
@@ -123,7 +154,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		status = true;
 		switch(e.getKeyCode()){
 			case KeyEvent.VK_P:{
-				
+				stop();
 				die();
 				createOnPause = true;
 				for(Enemy en : enemies){
@@ -135,16 +166,16 @@ public class GameEngine implements KeyListener, GameReporter{
 					//	en.enemyresume();
 					//	status = true;
 					//}
-					
+					gp.updateGameUI(this,true);
 				}
 				break;
 			}
 			case KeyEvent.VK_R:{
-				
+			    resume();
 				createOnPause = false;
 				start();
 				for(Enemy en : enemies){
-						
+						gp.updateGameUI(this,false);
 						en.enemyresume();
 				}break;
 			}
@@ -157,20 +188,26 @@ public class GameEngine implements KeyListener, GameReporter{
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_DOWN:
 			v.hmove(step);
+			tmpy += step;
 			break;	
 		case KeyEvent.VK_UP:
 			v.hmove(-step);
+			tmpy -= step;
 			break;			
 		case KeyEvent.VK_LEFT:
 			v.vmove(-step);
+			tmpx -=step;
 			break;
 		case KeyEvent.VK_RIGHT:
 			v.vmove(step);
+			tmpx += step;
 			break;
 		case KeyEvent.VK_D:
 			difficulty += 0.2;
 			break;
-		
+		case KeyEvent.VK_SPACE:
+			generateShot();
+			break;		
 		}
 	}
 

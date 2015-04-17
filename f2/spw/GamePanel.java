@@ -20,7 +20,7 @@ public class GamePanel extends JPanel {
 		big.setBackground(Color.WHITE);
 	}
 
-	public void updateGameUI(GameReporter reporter){
+	public void updateGameUI(GameReporter reporter,boolean cop){
 		big.clearRect(0, 0, 400, 600);
 		
 		big.setColor(Color.BLACK);		
@@ -28,11 +28,13 @@ public class GamePanel extends JPanel {
 		for(Sprite s : sprites){
 			s.draw(big);
 		}
-		/*if(reporter == 1)
-			big.drawString(String.format("PAUSE", reporter.getScore()), 200, 300);
+		if(cop){
+			big.drawString(String.format("PAUSE"), 195, 300);
 			for(Sprite s : sprites){
 				s.draw(big);
-		}*/
+			}
+		}
+		
 		repaint();
 	}
 
