@@ -23,9 +23,9 @@ public class GameEngine implements KeyListener, GameReporter{
 	public int tmpy = 450;
 	private int step = 2;
 	private Timer timer;
-	public static boolean status;
 	private long score = 0;
 	private double difficulty = 0.1;
+	public boolean status = false;
 	public boolean createOnPause = false;
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
@@ -40,6 +40,7 @@ public class GameEngine implements KeyListener, GameReporter{
 				process();
 			}
 		});
+
 		timer.setRepeats(true);
 		
 	}
@@ -58,7 +59,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		enemies.add(e);
 	}
 	private void generateItem(){
-		Item i = new Item((int)(Math.random()*390), 30);
+		Item i = new Item((int)(Math.random()*390), 30, this.createOnPause);
 		gp.sprites.add(i);
 		items.add(i);
 	}
@@ -69,75 +70,82 @@ public class GameEngine implements KeyListener, GameReporter{
 			generateItem();
 		}
 				
-		
 		if(Math.random() < difficulty){
 			generateEnemy();
-			
 		}
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
 		while(e_iter.hasNext()){
 			Enemy e = e_iter.next();
 			e.proceed();
-		
-		
+			
 			if(!e.isAlive() || e.isCreateOnPause()){
 				e_iter.remove();
 				gp.sprites.remove(e);
 				score += 100;
 			}
-		
 		}
+		
 		Iterator<Item> i_iter = items.iterator();
 		while(i_iter.hasNext()){
 			Item i = i_iter.next();
 			i.proceed();
 		
-		
-			if(!i.isAlive()){
+			if(!i.isAlive() || i.isCreateOnPause()){
 				i_iter.remove();
 				gp.sprites.remove(i);
-				//score += 100;
 			}
 		
 		}
+		
 		Iterator<Shot> s_iter = shots.iterator();
 		while(s_iter.hasNext()){
 			Shot s = s_iter.next();
 			s.proceed();
 		
 		
-			if(!s.isAlive()){
+			if(!s.isAlive() || s.isCreateOnPause()){
 				s_iter.remove();
 				gp.sprites.remove(s);
 			}
 		
 		}
+		
 		gp.updateGameUI(this,false);
 		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;
 		Rectangle2D.Double sr;
 		Rectangle2D.Double ir;
+		
 		for(Shot s : shots ){
 			sr = s.getRectangle();
 			for(Enemy e : enemies){
 				er = e.getRectangle();
-				if(sr.intersects(er)){
+				if(er.intersects(sr)){
 					gp.sprites.remove(e);
 					gp.sprites.remove(s);
+					e.isAlive();
+					e.isDie();
+					s.isDie();
+					s.isAlive();
+					score += 1000;
+				/*if(er.intersects(vr)){
+					die();
+					return;
+				}*/	
 				}
 			}
-			
 		}
+		
 		for(Item i : items){
 			ir = i.getRectangle();
 			if(ir.intersects(vr)){
-				//i_iter.remove();
 				gp.sprites.remove(i);
 				score += 500;
 			}
 		}
+		
 		for(Enemy e : enemies){
 			er = e.getRectangle();
 			if(er.intersects(vr)){
@@ -150,37 +158,33 @@ public class GameEngine implements KeyListener, GameReporter{
 	public void die(){
 		timer.stop();
 	}
+	
 	void control(KeyEvent e){
-		status = true;
+		
 		switch(e.getKeyCode()){
 			case KeyEvent.VK_P:{
-				stop();
-				die();
-				createOnPause = true;
-				for(Enemy en : enemies){
-					//if(status == true){
+				if(!status){
+					stop();
+					die();
+					status = true;
+					createOnPause = true;
+					for(Enemy en : enemies){
 						en.enemystop();
-					//	status = false;
-					//}
-					//else{
-					//	en.enemyresume();
-					//	status = true;
-					//}
-					gp.updateGameUI(this,true);
+						gp.updateGameUI(this,status);
+					}
+					break;				
 				}
-				break;
-			}
-			case KeyEvent.VK_R:{
-			    resume();
-				createOnPause = false;
-				start();
-				for(Enemy en : enemies){
-						gp.updateGameUI(this,false);
+				if(createOnPause){
+					resume();
+					status = false;
+					createOnPause = false;
+					start();
+					for(Enemy en : enemies){
+						gp.updateGameUI(this,status);
 						en.enemyresume();
-				}break;
+					}break;
+				}
 			}
-			
-		
 		}
 	}
 	
@@ -188,19 +192,19 @@ public class GameEngine implements KeyListener, GameReporter{
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_DOWN:
 			v.hmove(step);
-			tmpy += step;
+			tmpy += 8*step;
 			break;	
 		case KeyEvent.VK_UP:
 			v.hmove(-step);
-			tmpy -= step;
+			tmpy -= 8*step;
 			break;			
 		case KeyEvent.VK_LEFT:
 			v.vmove(-step);
-			tmpx -=step;
+			tmpx -= 8*step;
 			break;
 		case KeyEvent.VK_RIGHT:
 			v.vmove(step);
-			tmpx += step;
+			tmpx += 8*step;
 			break;
 		case KeyEvent.VK_D:
 			difficulty += 0.2;

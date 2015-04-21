@@ -11,7 +11,7 @@ public class Shot extends Sprite{
 	private int step = 12;
 	private boolean alive = true;
 	private boolean createOnPause;
-	
+	private boolean die = false;
 	public Shot(int x, int y, boolean createOnPause) {
 		super(x, y, 20, 20);
 		this.createOnPause = createOnPause;
@@ -19,30 +19,35 @@ public class Shot extends Sprite{
 
 	@Override
 	public void draw(Graphics2D g) {
-		if(!createOnPause){
+		//if(!createOnPause){
 		//////
-		if(y < Y_TO_FADE)
+		if(y > Y_TO_FADE)
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-		else{
+		else if(die){
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
-					(float)(Y_TO_DIE - y)/(Y_TO_DIE - Y_TO_FADE)));
+					(float)(y - Y_TO_DIE)/(Y_TO_FADE - Y_TO_DIE)));
 		}
 		g.setColor(Color.RED);
 		g.fillRect(x, y, width, height);
 		////////
-		}
+	//	}
 	}
 
 	public void proceed(){
 		y -= step;
-		if(y < Y_TO_DIE){
-			//alive = false;
+		if(die){
+			alive = false;
 		}
 	}
 	
-	public boolean isAlive(){
+	public void isDie(){
+		die = true;
+	}
+	
+		public boolean isAlive(){
 		return alive;
 	}
+	
 	public boolean isCreateOnPause(){
 		return createOnPause;
 	}

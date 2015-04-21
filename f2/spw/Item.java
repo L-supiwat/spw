@@ -10,10 +10,10 @@ public class Item extends Sprite{
 	
 	private int step = 12;
 	private boolean alive = true;
-	
-	public Item(int x, int y) {
-		super(x, y, 10, 20);
-		
+	private boolean createOnPause;
+	public Item(int x, int y, boolean createOnPause) {
+		super(x, y, 10, 10);
+		this.createOnPause = createOnPause;
 	}
 
 	@Override
@@ -34,6 +34,10 @@ public class Item extends Sprite{
 		if(y > Y_TO_DIE){
 			alive = false;
 		}
+	}
+	
+	public boolean isCreateOnPause(){
+		return createOnPause;
 	}
 	
 	public boolean isAlive(){

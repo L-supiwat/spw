@@ -11,7 +11,7 @@ public class Enemy extends Sprite{
 	private int step = 12;
 	private boolean alive = true;
 	private boolean createOnPause;
-	
+	private boolean die = false;
 	public Enemy(int x, int y, boolean createOnPause) {
 		super(x, y, 20, 20);
 		this.createOnPause = createOnPause;
@@ -23,7 +23,7 @@ public class Enemy extends Sprite{
 		//////
 		if(y < Y_TO_FADE)
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-		else{
+		else if(y >= Y_TO_FADE || !die){
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
 					(float)(Y_TO_DIE - y)/(Y_TO_DIE - Y_TO_FADE)));
 		}
@@ -41,11 +41,17 @@ public class Enemy extends Sprite{
 	}
 	
 	public boolean isAlive(){
-		return alive;
+			return alive;
+		
 	}
 	public boolean isCreateOnPause(){
 		return createOnPause;
 	}
+	
+	public void isDie(){
+		die = true;
+	}
+	
 	public void enemystop(){
 		step = 0;
 	}
