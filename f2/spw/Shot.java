@@ -8,12 +8,12 @@ public class Shot extends Sprite{
 	public static final int Y_TO_FADE = 30;
 	public static final int Y_TO_DIE = 0;
 	
-	private int step = 12;
+	private int step = 10;
 	private boolean alive = true;
 	private boolean createOnPause;
 	private boolean die = false;
 	public Shot(int x, int y, boolean createOnPause) {
-		super(x, y, 20, 20);
+		super(x+5, y, 10, 20);
 		this.createOnPause = createOnPause;
 	}
 
@@ -55,6 +55,6 @@ public class Shot extends Sprite{
 		step = 0;
 	}
 	public void shoting(){
-		step = 12;
+		step = 10;
 	}
 }

@@ -8,7 +8,7 @@ public class Enemy extends Sprite{
 	public static final int Y_TO_FADE = 400;
 	public static final int Y_TO_DIE = 600;
 	
-	private int step = 12;
+	private int step = 10;
 	private boolean alive = true;
 	private boolean createOnPause;
 	private boolean die = false;
@@ -23,7 +23,7 @@ public class Enemy extends Sprite{
 		//////
 		if(y < Y_TO_FADE)
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-		else if(y >= Y_TO_FADE || !die){
+		else {
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
 					(float)(Y_TO_DIE - y)/(Y_TO_DIE - Y_TO_FADE)));
 		}
@@ -56,6 +56,6 @@ public class Enemy extends Sprite{
 		step = 0;
 	}
 	public void enemyresume(){
-		step = 12;
+		step = 10;
 	}
 }

@@ -20,7 +20,7 @@ public class GamePanel extends JPanel {
 		big.setBackground(Color.WHITE);
 	}
 
-	public void updateGameUI(GameReporter reporter,boolean cop){
+	public void updateGameUI(GameReporter reporter,boolean cop,boolean isAlive){
 		big.clearRect(0, 0, 400, 600);
 		
 		big.setColor(Color.BLACK);		
@@ -30,6 +30,12 @@ public class GamePanel extends JPanel {
 		}
 		if(cop){
 			big.drawString(String.format("PAUSE"), 195, 300);
+			for(Sprite s : sprites){
+				s.draw(big);
+			}
+		}
+		if(isAlive){
+			big.drawString(String.format("GAME OVER"), 185, 300);
 			for(Sprite s : sprites){
 				s.draw(big);
 			}
