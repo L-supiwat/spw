@@ -13,7 +13,7 @@ public class Shot extends Sprite{
 	private boolean createOnPause;
 	private boolean die = false;
 	public Shot(int x, int y, boolean createOnPause) {
-		super(x+5, y, 10, 20);
+		super(x, y+5 , 20, 10);
 		this.createOnPause = createOnPause;
 	}
 
@@ -34,7 +34,7 @@ public class Shot extends Sprite{
 	}
 
 	public void proceed(){
-		y -= step;
+		x += step;
 		if(die){
 			alive = false;
 		}

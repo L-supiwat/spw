@@ -1,5 +1,10 @@
 package f2.spw;
 
+import java.io.*;
+import java.net.URL;
+import javax.sound.sampled.*;
+   
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -18,10 +23,11 @@ public class GameEngine implements KeyListener, GameReporter{
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ArrayList<Shot> shots = new ArrayList<Shot>();
 	private SpaceShip v;	
-
+	
 	private int step = 2;
 	private Timer timer;
 	private long score = 0;
+	private int hp;
 	private double difficulty = 0.1;
 	public boolean status = false;
 	public boolean createOnPause = false;
@@ -30,6 +36,8 @@ public class GameEngine implements KeyListener, GameReporter{
 		this.v = v;		
 		
 		gp.sprites.add(v);
+		
+		
 		
 		timer = new Timer(50, new ActionListener() {
 			
@@ -52,24 +60,26 @@ public class GameEngine implements KeyListener, GameReporter{
 		shots.add(s);
 	}
 	private void generateEnemy(){
-		Enemy e = new Enemy((int)(Math.random()*390), 30, this.createOnPause);
+		Enemy e = new Enemy( 650, (int)(Math.random()*340), this.createOnPause);
 		gp.sprites.add(e);
 		enemies.add(e);
 	}
 	private void generateItem(){
-		Item i = new Item((int)(Math.random()*390), 30, this.createOnPause);
+		Item i = new Item( 650, (int)(Math.random()*340), this.createOnPause);
 		gp.sprites.add(i);
 		items.add(i);
 	}
 	
 	private void process(){
 		
-		if(getScore() % 1000 == 100){
-			generateItem();
-		}
+	  
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		
+		
+		
 				
 		if(Math.random() < difficulty){
-			generateEnemy();
+			generateEnemy();generateItem();
 		}
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
@@ -80,7 +90,6 @@ public class GameEngine implements KeyListener, GameReporter{
 			if(!e.isAlive() || e.isCreateOnPause()){
 				e_iter.remove();
 				gp.sprites.remove(e);
-				score += 100;
 			}
 		}
 		
@@ -125,13 +134,20 @@ public class GameEngine implements KeyListener, GameReporter{
 					gp.sprites.remove(e);
 					shots.remove(s);
 					gp.sprites.remove(s);
-					score += 1000;
+					score += 500;
+					tk.beep();
 					return;
 				}
 			}
 			if(er.intersects(vr)){
-				gp.updateGameUI(this,status,true);
+				v.crash();
+				enemies.remove(e);
+				gp.sprites.remove(e);
+				if(v.getHp() == 0){
+					gp.updateGameUI(this,status,true);
 				die();
+				}
+				
 				return;
 			}
 		}
@@ -139,8 +155,11 @@ public class GameEngine implements KeyListener, GameReporter{
 		for(Item i : items){
 			ir = i.getRectangle();
 			if(vr.intersects(ir)){
+				v.heal();
+				enemies.remove(i);
 				gp.sprites.remove(i);
-				score += 500;
+				
+				
 			}
 		}
 		
@@ -162,6 +181,7 @@ public class GameEngine implements KeyListener, GameReporter{
 					for(Enemy en : enemies){
 						en.enemystop();
 						gp.updateGameUI(this,status,false);
+						
 					}
 					break;				
 				}
@@ -176,6 +196,8 @@ public class GameEngine implements KeyListener, GameReporter{
 					}break;
 				}
 			}
+			
+		
 		}
 	}
 	
@@ -191,7 +213,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			System.out.println("x = " + v.getX() + "y = " + v.getY());
 			break;	
 			
-		case KeyEvent.VK_LEFT:
+		/*case KeyEvent.VK_LEFT:
 			v.vmove(-step);
 			System.out.println("x = " + v.getX() + "y = " + v.getY());
 			break;
@@ -204,7 +226,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		case KeyEvent.VK_D:
 			difficulty += 0.2;
 			break;
-			
+		*/	
 		case KeyEvent.VK_SPACE:
 			generateShot();
 			break;		
@@ -214,6 +236,10 @@ public class GameEngine implements KeyListener, GameReporter{
 
 	public long getScore(){
 		return score;
+	}
+	
+	public int getheart(){
+		return v.getHp();
 	}
 	
 	@Override

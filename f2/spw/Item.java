@@ -30,7 +30,7 @@ public class Item extends Sprite{
 	}
 
 	public void proceed(){
-		y += step;
+		x -= step;
 		if(y > Y_TO_DIE){
 			alive = false;
 		}
@@ -43,4 +43,6 @@ public class Item extends Sprite{
 	public boolean isAlive(){
 		return alive;
 	}
+	
+	
 }
